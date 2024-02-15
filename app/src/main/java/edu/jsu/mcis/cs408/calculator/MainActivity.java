@@ -9,12 +9,26 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Toast;
+
 import edu.jsu.mcis.cs408.calculator.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private final int KEYS_HEIGHT = 4;
     private final int KEYS_WIDTH = 5;
+
+    class CalculatorClickHandler implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            String tag = view.getTag().toString();
+            Toast toast = Toast.makeText(binding.getRoot().getContext(), tag, Toast.LENGTH_SHORT);
+            toast.show();
+
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(view);
         initLayout();
     }
+
 
     private void initLayout() {
 
@@ -37,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView tv = createTextView();
         layout.addView(tv);
+        CalculatorClickHandler click = new CalculatorClickHandler();
 
         for (int row = 0; row < KEYS_HEIGHT; ++row) {
 
@@ -50,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 key.setText(btnLabelsArray[row * KEYS_WIDTH + col]);
                 key.setTextSize(24);
                 layout.addView(key);
+                key.setOnClickListener(click);
 
                 LayoutParams params = key.getLayoutParams();
                 params.width = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
