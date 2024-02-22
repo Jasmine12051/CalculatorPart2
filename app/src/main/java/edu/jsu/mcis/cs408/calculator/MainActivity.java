@@ -14,20 +14,20 @@ import android.widget.Toast;
 import edu.jsu.mcis.cs408.calculator.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
-    private ActivityMainBinding binding;
+    private static ActivityMainBinding binding;
     private final int KEYS_HEIGHT = 4;
     private final int KEYS_WIDTH = 5;
-
-    class CalculatorClickHandler implements View.OnClickListener {
+    private TextView displayTextview;
+    private static edu.jsu.mcis.cs408.calculator.calculatorController calculatorController;
+    static class CalculatorClickHandler implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {
             String tag = view.getTag().toString();
             Toast toast = Toast.makeText(binding.getRoot().getContext(), tag, Toast.LENGTH_SHORT);
             toast.show();
-
+            calculatorController.handleButtonClick(tag);
         }
-
     }
 
     @Override
@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
         initLayout();
+        calculatorController = new calculatorController(this);
+
     }
 
 
@@ -50,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
         String[] btnLabelsArray = getResources().getStringArray(R.array.btnLabels);
         String[] btnTagsArray = getResources().getStringArray(R.array.btnTags);
 
-        TextView tv = createTextView();
-        layout.addView(tv);
+        displayTextview = createTextView();
+        layout.addView(displayTextview);
         CalculatorClickHandler click = new CalculatorClickHandler();
 
         for (int row = 0; row < KEYS_HEIGHT; ++row) {
@@ -83,11 +85,11 @@ public class MainActivity extends AppCompatActivity {
         ConstraintSet set = new ConstraintSet();
         set.clone(layout);
 
-        set.connect(tv.getId(), ConstraintSet.START, binding.guideWest.getId(), ConstraintSet.END, 0);
-        set.connect(tv.getId(), ConstraintSet.END, binding.guideEast.getId(), ConstraintSet.START, 0);
-        set.connect(tv.getId(), ConstraintSet.TOP, binding.guideNorth.getId(), ConstraintSet.BOTTOM, 0);
-        set.constrainWidth(tv.getId(), ConstraintSet.MATCH_CONSTRAINT);
-        set.constrainHeight(tv.getId(), ConstraintSet.WRAP_CONTENT);
+        set.connect(displayTextview.getId(), ConstraintSet.START, binding.guideWest.getId(), ConstraintSet.END, 0);
+        set.connect(displayTextview.getId(), ConstraintSet.END, binding.guideEast.getId(), ConstraintSet.START, 0);
+        set.connect(displayTextview.getId(), ConstraintSet.TOP, binding.guideNorth.getId(), ConstraintSet.BOTTOM, 0);
+        set.constrainWidth(displayTextview.getId(), ConstraintSet.MATCH_CONSTRAINT);
+        set.constrainHeight(displayTextview.getId(), ConstraintSet.WRAP_CONTENT);
 
         //set.connect(key.getId(), ConstraintSet.TOP, tv.getId(), ConstraintSet.BOTTOM, 16); // Adjust the spacing
         //set.connect(key.getId(), ConstraintSet.START, binding.guideWest.getId(), ConstraintSet.END, col * 8); // Adjust the spacing
@@ -97,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (int col = 0; col < KEYS_WIDTH; ++col) {
-            set.createVerticalChain(tv.getId(), ConstraintSet.BOTTOM, binding.guideSouth.getId(), ConstraintSet.BOTTOM, verticals[col], null, ConstraintSet.CHAIN_PACKED);
+            set.createVerticalChain(displayTextview.getId(), ConstraintSet.BOTTOM, binding.guideSouth.getId(), ConstraintSet.BOTTOM, verticals[col], null, ConstraintSet.CHAIN_PACKED);
         }
 
         set.applyTo(layout);
@@ -112,6 +114,13 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(R.string.defaultTextInput);
         tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.END);
         tv.setTextSize(48);
+        displayTextview = tv;
         return tv;
     }
+
+    public void updateDisplay(String text) {
+        // Update the dynamically created TextView
+        displayTextview.setText(text);
+    }
+
 }

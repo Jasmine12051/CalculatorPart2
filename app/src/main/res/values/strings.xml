@@ -25,25 +25,25 @@
         <item>=</item>
     </string-array>
     <string-array name="btnTags">
-        <item>seven</item>
-        <item>eight</item>
-        <item>nine</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
         <item>squareroot</item>
         <item>clear</item>
-        <item>four</item>
-        <item>five</item>
-        <item>six</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
         <item>division</item>
         <item>percent</item>
-        <item>one</item>
-        <item>two</item>
-        <item>three</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
         <item>multiplication</item>
         <item>minus</item>
         <item>sign</item>
-        <item>zero</item>
-        <item>decimal</item>
-        <item>plus</item>
-        <item>equal</item>
+        <item>0</item>
+        <item>.</item>
+        <item>+</item>
+        <item>=</item>
     </string-array>
 </resources>
