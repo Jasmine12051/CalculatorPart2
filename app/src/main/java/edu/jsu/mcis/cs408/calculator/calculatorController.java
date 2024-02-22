@@ -10,13 +10,42 @@ public class calculatorController extends AbstractController {
     public calculatorController(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
         calculatorModel = new calculatorModel();
+        handleClearClick();
     }
 
     public void handleButtonClick(String buttonTag) {
-        if (buttonTag.matches("[0-9]")) {
-            handleDigitButtonClick(buttonTag);
-            Log.d("THIS ONE", "IT works");
+        if(calculatorModel.getCalculatorState() == CalculatorState.CLEAR) {
+            calculatorModel.setCalculatorState(CalculatorState.LHS);
         }
+        else if (calculatorModel.getCalculatorState() == CalculatorState.OP_SELECTED) {
+            calculatorModel.setCalculatorState(CalculatorState.RHS);
+        }
+
+        if (buttonTag.matches("[0-9]")) {
+                handleDigitButtonClick(buttonTag);
+            }
+        else if(buttonTag.matches("[+-×÷]")){
+            calculatorModel.setCalculatorState(CalculatorState.OP_SELECTED);
+            handleOperatorButtonClick(buttonTag);
+        }
+        else if(buttonTag.matches("C")){
+            calculatorModel.setCalculatorState(CalculatorState.CLEAR);
+            handleClearClick();
+        }
+        else if(buttonTag.matches("=")){
+            Log.d("TEST !", "THIS PART WORKS");
+            calculatorModel.setCalculatorState(CalculatorState.RESULT);
+            handleEqualClick();
+        }
+
+    }
+
+    private void handleEqualClick() {
+        calculatorModel.handleEqualClick();
+    }
+
+    private void handleOperatorButtonClick(String operator) {
+        calculatorModel.handleOperatorButtonClick(operator);
     }
 
     public void handleDigitButtonClick(String digit) {

@@ -91,8 +91,6 @@ public class MainActivity extends AppCompatActivity {
         set.constrainWidth(displayTextview.getId(), ConstraintSet.MATCH_CONSTRAINT);
         set.constrainHeight(displayTextview.getId(), ConstraintSet.WRAP_CONTENT);
 
-        //set.connect(key.getId(), ConstraintSet.TOP, tv.getId(), ConstraintSet.BOTTOM, 16); // Adjust the spacing
-        //set.connect(key.getId(), ConstraintSet.START, binding.guideWest.getId(), ConstraintSet.END, col * 8); // Adjust the spacing
 
         for (int row = 0; row < KEYS_HEIGHT; ++row) {
             set.createHorizontalChain(binding.guideWest.getId(), ConstraintSet.LEFT, binding.guideEast.getId(), ConstraintSet.RIGHT, horizontals[row], null, ConstraintSet.CHAIN_PACKED);

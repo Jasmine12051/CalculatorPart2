@@ -11,12 +11,15 @@ public class calculatorModel {
     private BigDecimal currentOperand;
     private CalculatorState calculatorState;
 
+    private OperatorEnum currentOperator;
+
     public calculatorModel() {
         // Initialize default values
         leftOperand = BigDecimal.ZERO;
         rightOperand = BigDecimal.ZERO;
         currentOperand = BigDecimal.ZERO;
         calculatorState = CalculatorState.CLEAR;
+        currentOperator = OperatorEnum.ADDITION;
     }
 
     // Getter and setter methods for leftOperand, rightOperand, currentOperator, calculatorState
@@ -45,6 +48,14 @@ public class calculatorModel {
         this.currentOperand = newOperand;
     }
 
+    public OperatorEnum getCurrentOperator(){
+        return currentOperator;
+    }
+
+    public void setCurrentOperator(OperatorEnum newOperator){
+        this.currentOperator = newOperator;
+    }
+
 
     public void setCalculatorState(CalculatorState state) {
         this.calculatorState = state;
@@ -56,13 +67,51 @@ public class calculatorModel {
 
     public void handleDigitClick(String digit) {
         // Handle the click of a digit button
-        BigDecimal currentOperand = getCurrentOperand();
-        String updatedOperand = currentOperand.toString() + digit;
-        BigDecimal newOperand = new BigDecimal(updatedOperand);
-        setCurrentOperand(newOperand);
-        Log.d("THIS WORKS", "NEW Operand " + currentOperand);
+        if(getCalculatorState() == CalculatorState.LHS){
+            BigDecimal leftOperand = getLeftOperand();
+            String updatedOperand = leftOperand.toString() + digit;
+            BigDecimal newOperand = new BigDecimal(updatedOperand);
+            setLeftOperand(newOperand);
+            Log.d("Test3", "LeftHandOperand : " + getLeftOperand());
+        }
+        else if(getCalculatorState() == CalculatorState.RHS){
+            BigDecimal rightOperand = getRightOperand();
+            String updatedOperand = rightOperand.toString() + digit;
+            BigDecimal newOperand = new BigDecimal(updatedOperand);
+            setRightOperand(newOperand);
+            Log.d("Test4", "RightHandOperand : " + getRightOperand());
+        }
     }
 
+    public void handleOperatorButtonClick(String operator){
+        if(operator.matches(OperatorEnum.SUBTRACTION.getSymbol())){
+            OperatorEnum newOperator = OperatorEnum.SUBTRACTION;
+            setCurrentOperator(newOperator);
+            Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
+        }
+        else if(operator.matches(OperatorEnum.MULTIPLICATION.getSymbol())){
+            OperatorEnum newOperator = OperatorEnum.MULTIPLICATION;
+            setCurrentOperator(newOperator);
+            Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
+        }
+        else if(operator.matches(OperatorEnum.MULTIPLICATION.getSymbol())){
+            OperatorEnum newOperator = OperatorEnum.DIVISION;
+            setCurrentOperator(newOperator);
+            Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
+        }
+        else{
+            getCurrentOperator();
+        }
+    }
+
+    public void handleEqualClick(){
+        if(getCalculatorState() == CalculatorState.RESULT){
+
+            Log.d("Test6", "THIS RUNS");
+
+        }
+
+    }
 
     public void handleClearClick() {
         // Handle the click of the clear button
