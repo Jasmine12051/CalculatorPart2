@@ -1,7 +1,7 @@
 package edu.jsu.mcis.cs408.calculator;
 
 public enum OperatorEnum {
-    ADDITION("+"),
+    ADDITION("\\+"),
     SUBTRACTION("-"),
     MULTIPLICATION("×"),
     DIVISION("÷");

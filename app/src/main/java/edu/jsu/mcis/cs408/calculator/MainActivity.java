@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
             String tag = view.getTag().toString();
             Toast toast = Toast.makeText(binding.getRoot().getContext(), tag, Toast.LENGTH_SHORT);
             toast.show();
-            calculatorController.handleButtonClick(tag);
+            calculatorModel.handleButtonClick(tag);
         }
     }
 

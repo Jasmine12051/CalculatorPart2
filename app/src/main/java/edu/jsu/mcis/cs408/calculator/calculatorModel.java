@@ -6,12 +6,12 @@ import java.math.BigDecimal;
 
 
 public class calculatorModel {
-    private BigDecimal leftOperand;
-    private BigDecimal rightOperand;
+    private static BigDecimal leftOperand;
+    private static BigDecimal rightOperand;
     private BigDecimal currentOperand;
-    private CalculatorState calculatorState;
+    private static CalculatorState calculatorState;
 
-    private OperatorEnum currentOperator;
+    private static OperatorEnum currentOperator;
 
     public calculatorModel() {
         // Initialize default values
@@ -24,19 +24,19 @@ public class calculatorModel {
 
     // Getter and setter methods for leftOperand, rightOperand, currentOperator, calculatorState
 
-    public void setLeftOperand(BigDecimal value) {
-        this.leftOperand = value;
+    public static void setLeftOperand(BigDecimal value) {
+        leftOperand = value;
     }
 
-    public BigDecimal getLeftOperand() {
+    public static BigDecimal getLeftOperand() {
         return leftOperand;
     }
 
-    public void setRightOperand(BigDecimal value) {
-        this.rightOperand = value;
+    public static void setRightOperand(BigDecimal value) {
+        rightOperand = value;
     }
 
-    public BigDecimal getRightOperand() {
+    public static BigDecimal getRightOperand() {
         return rightOperand;
     }
 
@@ -48,78 +48,125 @@ public class calculatorModel {
         this.currentOperand = newOperand;
     }
 
-    public OperatorEnum getCurrentOperator(){
+    public static OperatorEnum getCurrentOperator(){
         return currentOperator;
     }
 
-    public void setCurrentOperator(OperatorEnum newOperator){
-        this.currentOperator = newOperator;
+    public static void setCurrentOperator(OperatorEnum newOperator){
+        currentOperator = newOperator;
     }
 
 
-    public void setCalculatorState(CalculatorState state) {
-        this.calculatorState = state;
+    public static void setCalculatorState(CalculatorState state) {
+        calculatorState = state;
     }
 
-    public CalculatorState getCalculatorState() {
+    public static CalculatorState getCalculatorState() {
         return calculatorState;
     }
 
-    public void handleDigitClick(String digit) {
+    public static void handleButtonClick(String buttonTag) {
+        switch (getCalculatorState()) {
+            case CLEAR:
+                setCalculatorState(CalculatorState.LHS);
+                break;
+            case OP_SELECTED:
+                setCalculatorState(CalculatorState.RHS);
+                break;
+        }
+
+        switch (buttonTag) {
+            case "C":
+                setCalculatorState(CalculatorState.CLEAR);
+                handleClearClick();
+                break;
+            case "=":
+                setCalculatorState(CalculatorState.RESULT);
+                handleEqualClick();
+                break;
+            case "+":
+            case "-":
+            case "×":
+            case "÷":
+                setCalculatorState(CalculatorState.OP_SELECTED);
+                handleOperatorButtonClick(buttonTag);
+                break;
+            default:
+                if (buttonTag.matches("[0-9]")) {
+                    handleDigitClick(buttonTag);
+                }
+                break;
+        }
+    }
+
+    public static void handleDigitClick(String digit) {
         // Handle the click of a digit button
-        if(getCalculatorState() == CalculatorState.LHS){
-            BigDecimal leftOperand = getLeftOperand();
-            String updatedOperand = leftOperand.toString() + digit;
+        if (getCalculatorState() == CalculatorState.LHS) {
+            String updatedOperand = getLeftOperand().toString() + digit;
             BigDecimal newOperand = new BigDecimal(updatedOperand);
             setLeftOperand(newOperand);
             Log.d("Test3", "LeftHandOperand : " + getLeftOperand());
-        }
-        else if(getCalculatorState() == CalculatorState.RHS){
-            BigDecimal rightOperand = getRightOperand();
-            String updatedOperand = rightOperand.toString() + digit;
+        } else if (getCalculatorState() == CalculatorState.RHS) {
+            String updatedOperand = getRightOperand().toString() + digit;
             BigDecimal newOperand = new BigDecimal(updatedOperand);
             setRightOperand(newOperand);
             Log.d("Test4", "RightHandOperand : " + getRightOperand());
         }
     }
 
-    public void handleOperatorButtonClick(String operator){
-        if(operator.matches(OperatorEnum.SUBTRACTION.getSymbol())){
+    public static void handleOperatorButtonClick(String operator) {
+        if (operator.matches(OperatorEnum.ADDITION.getSymbol())) {
+            OperatorEnum newOperator = OperatorEnum.ADDITION;
+            setCurrentOperator(newOperator);
+            Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
+        } else if (operator.matches(OperatorEnum.SUBTRACTION.getSymbol())) {
             OperatorEnum newOperator = OperatorEnum.SUBTRACTION;
             setCurrentOperator(newOperator);
             Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
-        }
-        else if(operator.matches(OperatorEnum.MULTIPLICATION.getSymbol())){
+        } else if (operator.matches(OperatorEnum.MULTIPLICATION.getSymbol())) {
             OperatorEnum newOperator = OperatorEnum.MULTIPLICATION;
             setCurrentOperator(newOperator);
             Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
-        }
-        else if(operator.matches(OperatorEnum.MULTIPLICATION.getSymbol())){
+        } else if (operator.matches(OperatorEnum.DIVISION.getSymbol())) {
             OperatorEnum newOperator = OperatorEnum.DIVISION;
             setCurrentOperator(newOperator);
             Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
         }
-        else{
-            getCurrentOperator();
-        }
     }
 
-    public void handleEqualClick(){
+    public static void handleEqualClick(){
         if(getCalculatorState() == CalculatorState.RESULT){
-
-            Log.d("Test6", "THIS RUNS");
+            BigDecimal leftOperand = getLeftOperand();
+            BigDecimal rightOperand = getRightOperand();
+            OperatorEnum currentOperator = getCurrentOperator();
+            if(currentOperator == OperatorEnum.SUBTRACTION){
+                BigDecimal result = leftOperand.subtract(rightOperand);
+                Log.d("Test6", "Here is the result: " + result);
+            }
+            else if(currentOperator == OperatorEnum.ADDITION){
+                BigDecimal result = leftOperand.add(rightOperand);
+                Log.d("Test6", "Here is the result: " + result);
+            }
+            else if(currentOperator == OperatorEnum.MULTIPLICATION){
+                BigDecimal result = leftOperand.multiply(rightOperand);
+                Log.d("Test6", "Here is the result: " + result);
+            }
+            else if(currentOperator == OperatorEnum.DIVISION){
+                BigDecimal result = leftOperand.divide(rightOperand);
+                Log.d("Test6", "Here is the result: " + result);
+            }
 
         }
 
     }
 
-    public void handleClearClick() {
+    public static void handleClearClick() {
         // Handle the click of the clear button
         resetCalculator();
     }
 
 
-    private void resetCalculator() {
+    private static void resetCalculator() {
         // Reset the calculator to its initial state
         leftOperand = BigDecimal.ZERO;
         rightOperand = BigDecimal.ZERO;
