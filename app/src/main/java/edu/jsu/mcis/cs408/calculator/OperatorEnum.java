@@ -6,7 +6,10 @@ public enum OperatorEnum {
     MULTIPLICATION("×"),
     DIVISION("÷"),
 
-    SQUAREROOT("√");
+    SQUAREROOT("√"),
+
+    PERCENT("%");
+
 
     private String symbol;
 

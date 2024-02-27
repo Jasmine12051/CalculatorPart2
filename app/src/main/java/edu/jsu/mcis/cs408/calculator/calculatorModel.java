@@ -1,5 +1,6 @@
 package edu.jsu.mcis.cs408.calculator;
 
+
 import android.util.Log;
 
 import java.math.BigDecimal;
@@ -9,10 +10,12 @@ import java.math.BigDecimal;
 public class calculatorModel {
     private static BigDecimal leftOperand;
     private static BigDecimal rightOperand;
-    private BigDecimal currentOperand;
+    private static BigDecimal currentOperand;
+
     private static CalculatorState calculatorState;
 
     private static OperatorEnum currentOperator;
+    private static OperatorEnum newOperator;
 
     public calculatorModel() {
         // Initialize default values
@@ -45,8 +48,9 @@ public class calculatorModel {
         return currentOperand;
     }
 
-    public void setCurrentOperand(BigDecimal newOperand) {
-        this.currentOperand = newOperand;
+    public static BigDecimal setCurrentOperand(BigDecimal newOperand) {
+        currentOperand = newOperand;
+        return newOperand;
     }
 
     public static OperatorEnum getCurrentOperator(){
@@ -56,6 +60,7 @@ public class calculatorModel {
     public static void setCurrentOperator(OperatorEnum newOperator){
         currentOperator = newOperator;
     }
+
 
 
     public static void setCalculatorState(CalculatorState state) {
@@ -98,8 +103,11 @@ public class calculatorModel {
                 setCalculatorState(CalculatorState.OP_SELECTED);
                 handleOperatorButtonClick(buttonTag);
                 break;
+            case "%":
+                setCalculatorState(CalculatorState.RESULT);
+                handlePercentClick();
             default:
-                if (buttonTag.matches("[0-9]")) {
+                if (buttonTag.matches("[0-9]")||buttonTag.matches(".")) {
                     handleDigitClick(buttonTag);
                 }
                 break;
@@ -144,6 +152,11 @@ public class calculatorModel {
             setCurrentOperator(newOperator);
             Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
         }
+        else if (operator.matches(OperatorEnum.PERCENT.getSymbol())) {
+            OperatorEnum newOperator = OperatorEnum.PERCENT;
+            handlePercentClick();
+            Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol() + "THE PERCENT WAS PUSHED");
+        }
     }
 
     public static void handleEqualClick(){
@@ -159,10 +172,12 @@ public class calculatorModel {
                 Log.d("Test6", "Here is the result: " + result);
             }
             else if(currentOperator == OperatorEnum.SUBTRACTION){
+
                 BigDecimal result = leftOperand.subtract(rightOperand);
                 Log.d("Test6", "Here is the result: " + result);
             }
             else if(currentOperator == OperatorEnum.ADDITION){
+
                 BigDecimal result = leftOperand.add(rightOperand);
                 Log.d("Test6", "Here is the result: " + result);
             }
@@ -192,4 +207,17 @@ public class calculatorModel {
         setCalculatorState(CalculatorState.CLEAR);
     }
 
+    private static void handlePercentClick(){
+        BigDecimal leftOperand = getLeftOperand();
+        BigDecimal rightOperand = getRightOperand();
+        OperatorEnum currentOperator = getCurrentOperator();
+        if(getCalculatorState() == CalculatorState.RESULT) {
+            BigDecimal value = rightOperand.divide(BigDecimal.valueOf(100));
+            BigDecimal result = leftOperand.multiply(value);
+            setRightOperand(result);
+
+
+        }
+
+    }
 }
