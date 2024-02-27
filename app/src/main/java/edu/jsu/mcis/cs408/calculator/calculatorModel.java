@@ -5,6 +5,7 @@ import android.util.Log;
 import java.math.BigDecimal;
 
 
+
 public class calculatorModel {
     private static BigDecimal leftOperand;
     private static BigDecimal rightOperand;
@@ -71,7 +72,12 @@ public class calculatorModel {
                 setCalculatorState(CalculatorState.LHS);
                 break;
             case OP_SELECTED:
-                setCalculatorState(CalculatorState.RHS);
+                if(currentOperator.getSymbol().matches(OperatorEnum.SQUAREROOT.getSymbol())){
+                    setCalculatorState(CalculatorState.RESULT);
+                }
+                else{
+                    setCalculatorState(CalculatorState.RHS);
+                }
                 break;
         }
 
@@ -88,6 +94,7 @@ public class calculatorModel {
             case "-":
             case "×":
             case "÷":
+            case "√":
                 setCalculatorState(CalculatorState.OP_SELECTED);
                 handleOperatorButtonClick(buttonTag);
                 break;
@@ -132,14 +139,26 @@ public class calculatorModel {
             setCurrentOperator(newOperator);
             Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
         }
+        else if (operator.matches(OperatorEnum.SQUAREROOT.getSymbol())) {
+            OperatorEnum newOperator = OperatorEnum.SQUAREROOT;
+            setCurrentOperator(newOperator);
+            Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
+        }
     }
 
     public static void handleEqualClick(){
+
+        OperatorEnum currentOperator = getCurrentOperator();
+        BigDecimal leftOperand = getLeftOperand();
+        BigDecimal rightOperand = getRightOperand();
+
         if(getCalculatorState() == CalculatorState.RESULT){
-            BigDecimal leftOperand = getLeftOperand();
-            BigDecimal rightOperand = getRightOperand();
-            OperatorEnum currentOperator = getCurrentOperator();
-            if(currentOperator == OperatorEnum.SUBTRACTION){
+            if(currentOperator == OperatorEnum.SQUAREROOT){
+                double doubleResult = Math.sqrt(leftOperand.doubleValue());
+                BigDecimal result = BigDecimal.valueOf(doubleResult);
+                Log.d("Test6", "Here is the result: " + result);
+            }
+            else if(currentOperator == OperatorEnum.SUBTRACTION){
                 BigDecimal result = leftOperand.subtract(rightOperand);
                 Log.d("Test6", "Here is the result: " + result);
             }

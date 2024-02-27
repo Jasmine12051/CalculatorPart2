@@ -4,7 +4,9 @@ public enum OperatorEnum {
     ADDITION("\\+"),
     SUBTRACTION("-"),
     MULTIPLICATION("×"),
-    DIVISION("÷");
+    DIVISION("÷"),
+
+    SQUAREROOT("√");
 
     private String symbol;
 
