@@ -3,21 +3,29 @@ package edu.jsu.mcis.cs408.calculator;
 import android.util.Log;
 import java.math.BigDecimal;
 
-public class calculatorModel extends AbstractModel {
+public class CalculatorModel extends AbstractModel {
 
     private static final int MAX_DISPLAY_LENGTH = 10;
     private String text1;
-    private static BigDecimal leftOperand;
-    private static BigDecimal rightOperand;
+    private BigDecimal leftOperand;
+    private BigDecimal rightOperand;
+
+    private BigDecimal result;
+
     private static CalculatorState calculatorState;
     private static OperatorEnum currentOperator;
 
-    public calculatorModel() {
+    private boolean decimalEntered = false;
+    private boolean decimalNext = false;
+
+    public CalculatorModel() {
         // Initialize default values
         leftOperand = BigDecimal.ZERO;
         rightOperand = BigDecimal.ZERO;
         calculatorState = CalculatorState.CLEAR;
         currentOperator = OperatorEnum.ADDITION;
+        result = BigDecimal.ZERO;
+        decimalEntered = decimalNext = false;
     }
 
     public String getText1() {
@@ -30,42 +38,61 @@ public class calculatorModel extends AbstractModel {
 
         Log.d("TAG", "Text1 Change: From " + oldText + " to " + newText);
 
-        firePropertyChange(calculatorController.ELEMENT_TEXTVIEW1_PROPERTY, oldText, newText);
+        firePropertyChange(CalculatorController.ELEMENT_TEXTVIEW1_PROPERTY, oldText, newText);
     }
 
-    public static void setLeftOperand(BigDecimal value) {
+    public void setLeftOperand(BigDecimal value) {
+
+        String oldValue = leftOperand.toString();
+
         leftOperand = value;
+        String newValue = leftOperand.toString();
+
+        firePropertyChange(CalculatorController.ELEMENT_NEWKEY_PROPERTY, oldValue, newValue);
+
     }
 
-    public static BigDecimal getLeftOperand() {
+    public BigDecimal getLeftOperand() {
         return leftOperand;
     }
 
-    public static void setRightOperand(BigDecimal value) {
+    public void setRightOperand(BigDecimal value) {
+
+        String oldValue = rightOperand.toString();
+
         rightOperand = value;
+        String newValue = rightOperand.toString();
+
+        firePropertyChange(CalculatorController.ELEMENT_NEWKEY_PROPERTY, oldValue, newValue);
+
     }
 
-    public static BigDecimal getRightOperand() {
+    public BigDecimal getRightOperand() {
         return rightOperand;
     }
 
-    public static OperatorEnum getCurrentOperator(){
+    public OperatorEnum getCurrentOperator(){
         return currentOperator;
     }
 
-    public static void setCurrentOperator(OperatorEnum newOperator){
+    public void setCurrentOperator(OperatorEnum newOperator){
         currentOperator = newOperator;
     }
 
-    public static void setCalculatorState(CalculatorState state) {
+    public void setCalculatorState(CalculatorState state) {
+
         calculatorState = state;
+
+        decimalEntered = decimalNext = false;
+
     }
 
-    public static CalculatorState getCalculatorState() {
+    public CalculatorState getCalculatorState() {
         return calculatorState;
     }
 
-    public static void handleButtonClick(String buttonTag) {
+    public void setKey(String buttonTag) {
+
         switch (getCalculatorState()) {
             case CLEAR:
                 setCalculatorState(CalculatorState.LHS);
@@ -111,18 +138,24 @@ public class calculatorModel extends AbstractModel {
         }
     }
 
-    public static void handleDigitClick(String digit) {
+    public void handleDigitClick(String digit) {
         // Handle the click of a digit button
         if (getCalculatorState() == CalculatorState.LHS) {
             // Use StringBuilder to handle appending digits
             StringBuilder lhsStringBuilder = new StringBuilder(getLeftOperand().toString());
 
             // Check if the digit is a decimal point and if one is already present
-            if (digit.equals(".") && lhsStringBuilder.indexOf(".") == -1) {
+            if (digit.equals(".") && (!decimalEntered) ) {
+                Log.d("Test3", "Decimal Entered!");
                 lhsStringBuilder.append(digit);
+                decimalEntered = decimalNext = true;
             }
             else if (!digit.equals(".")) {
+                if (decimalNext) {
+                    lhsStringBuilder.append(".");
+                }
                 lhsStringBuilder.append(digit);
+                decimalNext = false;
             }
 
             // Limit the length of the operand based on the display size
@@ -136,10 +169,16 @@ public class calculatorModel extends AbstractModel {
             StringBuilder rhsStringBuilder = new StringBuilder(getRightOperand().toString());
 
             // Check if the digit is a decimal point and if one is already present
-            if (digit.equals(".") && rhsStringBuilder.indexOf(".") == -1) {
+            if (digit.equals(".") && (!decimalEntered) ) {
+                Log.d("Test3", "Decimal Entered!");
                 rhsStringBuilder.append(digit);
+                decimalEntered = decimalNext = true;
             } else if (!digit.equals(".")) {
+                if (decimalNext) {
+                    rhsStringBuilder.append(".");
+                }
                 rhsStringBuilder.append(digit);
+                decimalNext = false;
             }
 
             // Limit the length of the operand based on the display size
@@ -151,7 +190,7 @@ public class calculatorModel extends AbstractModel {
         }
     }
 
-    public static void handleOperatorButtonClick(String operator) {
+    public void handleOperatorButtonClick(String operator) {
         if (operator.matches(OperatorEnum.ADDITION.getSymbol())) {
             OperatorEnum newOperator = OperatorEnum.ADDITION;
             setCurrentOperator(newOperator);
@@ -176,16 +215,17 @@ public class calculatorModel extends AbstractModel {
         }
     }
 
-    public static void handleEqualClick(){
+    public void handleEqualClick(){
 
         OperatorEnum currentOperator = getCurrentOperator();
         BigDecimal leftOperand = getLeftOperand();
         BigDecimal rightOperand = getRightOperand();
 
         if (getCalculatorState() == CalculatorState.RESULT) {
+            Log.d("Test6", "Getting result ...");
             if (currentOperator == OperatorEnum.SQUAREROOT) {
                 double doubleResult = Math.sqrt(leftOperand.doubleValue());
-                BigDecimal result = BigDecimal.valueOf(doubleResult);
+                setResult(BigDecimal.valueOf(doubleResult));
                 Log.d("Test6", "Here is the result: " + result);
             }
             else {
@@ -193,35 +233,51 @@ public class calculatorModel extends AbstractModel {
                     rightOperand = leftOperand;
                 }
 
-                BigDecimal result = BigDecimal.valueOf(0);
+                setResult(BigDecimal.valueOf(0));
                 if (currentOperator == OperatorEnum.SUBTRACTION) {
-                    result = leftOperand.subtract(rightOperand);
+                    setResult(leftOperand.subtract(rightOperand));
                 } else if (currentOperator == OperatorEnum.ADDITION) {
-                    result = leftOperand.add(rightOperand);
+                    setResult(leftOperand.add(rightOperand));
                 } else if (currentOperator == OperatorEnum.MULTIPLICATION) {
-                    result = leftOperand.multiply(rightOperand);
+                    setResult(leftOperand.multiply(rightOperand));
                 } else if (currentOperator == OperatorEnum.DIVISION) {
-                    result = leftOperand.divide(rightOperand);
+                    setResult(leftOperand.divide(rightOperand));
                 }
                 Log.d("Test6", "Here is the result: " + result);
             }
         }
     }
 
-    public static void handleClearClick() {
+    private void setResult(BigDecimal newResult) {
+
+        String oldValue = result.toString();
+
+        this.result = newResult;
+        String newValue = result.toString();
+
+        firePropertyChange(CalculatorController.ELEMENT_NEWKEY_PROPERTY, oldValue, newValue);
+
+    }
+
+    public void handleClearClick() {
         // Handle the click of the clear button
         resetCalculator();
     }
 
 
-    private static void resetCalculator() {
+    private void resetCalculator() {
+
         // Reset the calculator to its initial state
-        leftOperand = BigDecimal.ZERO;
+
+        setLeftOperand(BigDecimal.ZERO);
         rightOperand = BigDecimal.ZERO;
+        decimalEntered = decimalNext = false;
+
         setCalculatorState(CalculatorState.CLEAR);
+
     }
 
-    private static void handlePercentClick(){
+    private void handlePercentClick(){
         BigDecimal leftOperand = getLeftOperand();
         BigDecimal rightOperand = getRightOperand();
         if(getCalculatorState() == CalculatorState.RESULT) {

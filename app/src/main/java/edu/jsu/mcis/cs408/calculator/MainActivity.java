@@ -11,33 +11,57 @@ import android.widget.TextView;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Toast;
 
+import java.beans.PropertyChangeEvent;
+
 import edu.jsu.mcis.cs408.calculator.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity {
-    private static ActivityMainBinding binding;
+public class MainActivity extends AppCompatActivity implements AbstractView {
+
+    private ActivityMainBinding binding;
     private final int KEYS_HEIGHT = 4;
     private final int KEYS_WIDTH = 5;
     private TextView displayTextview;
-    private static edu.jsu.mcis.cs408.calculator.calculatorController calculatorController;
-    static class CalculatorClickHandler implements View.OnClickListener {
+    private CalculatorController calculatorController;
+    private class CalculatorClickHandler implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {
             String tag = view.getTag().toString();
             Toast toast = Toast.makeText(binding.getRoot().getContext(), tag, Toast.LENGTH_SHORT);
             toast.show();
-            calculatorModel.handleButtonClick(tag);
+            calculatorController.changeElementNewKey(tag);
         }
     }
 
     @Override
+    public void modelPropertyChange(final PropertyChangeEvent evt) {
+
+        String propertyName = evt.getPropertyName();
+
+        if ( propertyName.equals(CalculatorController.ELEMENT_NEWKEY_PROPERTY) ) {
+
+            TextView output = binding.layout.findViewWithTag("output");
+
+            output.setText(evt.getNewValue().toString());
+
+        }
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
         initLayout();
-        calculatorController = new calculatorController(this);
+
+        calculatorController = new CalculatorController();
+        calculatorController.addView(this);
+
+        CalculatorModel model = new CalculatorModel();
+        calculatorController.addModel(model);
 
     }
 
@@ -108,17 +132,12 @@ public class MainActivity extends AppCompatActivity {
         int id = View.generateViewId();
         TextView tv = new TextView(this);
         tv.setId(id);
-        tv.setTag("TextView" + id);
+        tv.setTag("output");
         tv.setText(R.string.defaultTextInput);
         tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.END);
         tv.setTextSize(48);
         displayTextview = tv;
         return tv;
-    }
-
-    public void updateDisplay(String text) {
-        // Update the dynamically created TextView
-        displayTextview.setText(text);
     }
 
 }
