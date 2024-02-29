@@ -11,4 +11,10 @@ public class calculatorController extends AbstractController {
         calculatorModel = new calculatorModel();
     }
 
+    public static final String ELEMENT_TEXTVIEW1_PROPERTY = "0";
+
+    public void changeElementTextview1(String newText) {
+        setModelProperty(ELEMENT_TEXTVIEW1_PROPERTY, newText);
+    }
+
 }
