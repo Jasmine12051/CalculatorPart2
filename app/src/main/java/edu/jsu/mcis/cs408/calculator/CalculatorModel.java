@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 
 public class CalculatorModel extends AbstractModel {
 
-    private static final int MAX_DISPLAY_LENGTH = 10;
+    private static final int MAX_DISPLAY_LENGTH = 27;
     private String text1;
     private BigDecimal leftOperand;
     private BigDecimal rightOperand;
@@ -17,6 +17,8 @@ public class CalculatorModel extends AbstractModel {
 
     private boolean decimalEntered = false;
     private boolean decimalNext = false;
+
+    private boolean negativeSign = false;
 
     public CalculatorModel() {
         // Initialize default values
@@ -79,6 +81,11 @@ public class CalculatorModel extends AbstractModel {
         currentOperator = newOperator;
     }
 
+    public StringBuilder getLHSStringBuilder(){
+        StringBuilder lhsStringBuilder = new StringBuilder(getLeftOperand().toString());
+        return lhsStringBuilder;
+    }
+
     public void setCalculatorState(CalculatorState state) {
 
         calculatorState = state;
@@ -102,6 +109,7 @@ public class CalculatorModel extends AbstractModel {
                     setCalculatorState(CalculatorState.RESULT);
                 }
                 else{
+                    setRightOperand(BigDecimal.ZERO);
                     setCalculatorState(CalculatorState.RHS);
                 }
                 break;
@@ -121,6 +129,13 @@ public class CalculatorModel extends AbstractModel {
             case "×":
             case "÷":
             case "√":
+                if(getCalculatorState() == CalculatorState.RHS){
+                    setCalculatorState(CalculatorState.RESULT);
+                    handleEqualClick();
+                    setLeftOperand(result);
+                    setCalculatorState(CalculatorState.OP_SELECTED);
+                    Log.d("TESTING", "THIS IS THE LEFT OPERAND NOW " + getCalculatorState());
+                }
                 setCalculatorState(CalculatorState.OP_SELECTED);
                 handleOperatorButtonClick(buttonTag);
                 break;
@@ -130,6 +145,9 @@ public class CalculatorModel extends AbstractModel {
                 break;
             case ".":
                 handleDigitClick(buttonTag);
+                break;
+            case "±":
+                handleSignClick();
             default:
                 if (buttonTag.matches("[0-9]")) {
                     handleDigitClick(buttonTag);
@@ -142,7 +160,7 @@ public class CalculatorModel extends AbstractModel {
         // Handle the click of a digit button
         if (getCalculatorState() == CalculatorState.LHS) {
             // Use StringBuilder to handle appending digits
-            StringBuilder lhsStringBuilder = new StringBuilder(getLeftOperand().toString());
+            StringBuilder lhsStringBuilder = getLHSStringBuilder();
 
             // Check if the digit is a decimal point and if one is already present
             if (digit.equals(".") && (!decimalEntered) ) {
@@ -285,5 +303,9 @@ public class CalculatorModel extends AbstractModel {
             BigDecimal result = leftOperand.multiply(value);
             setRightOperand(result);
         }
+    }
+
+    private void handleSignClick(){
+
     }
 }
