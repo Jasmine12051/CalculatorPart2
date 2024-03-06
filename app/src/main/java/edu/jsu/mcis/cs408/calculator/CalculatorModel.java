@@ -2,11 +2,12 @@ package edu.jsu.mcis.cs408.calculator;
 
 import android.util.Log;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 public class CalculatorModel extends AbstractModel {
 
     private static final int MAX_DISPLAY_LENGTH = 27;
-    private String text1;
     private BigDecimal leftOperand;
     private BigDecimal rightOperand;
 
@@ -18,7 +19,6 @@ public class CalculatorModel extends AbstractModel {
     private boolean decimalEntered = false;
     private boolean decimalNext = false;
 
-    private boolean negativeSign = false;
 
     public CalculatorModel() {
         // Initialize default values
@@ -30,18 +30,7 @@ public class CalculatorModel extends AbstractModel {
         decimalEntered = decimalNext = false;
     }
 
-    public String getText1() {
-        return text1;
-    }
 
-    public void setText1(String newText) {
-        String oldText = this.text1;
-        this.text1 = newText;
-
-        Log.d("TAG", "Text1 Change: From " + oldText + " to " + newText);
-
-        firePropertyChange(CalculatorController.ELEMENT_TEXTVIEW1_PROPERTY, oldText, newText);
-    }
 
     public void setLeftOperand(BigDecimal value) {
 
@@ -81,10 +70,6 @@ public class CalculatorModel extends AbstractModel {
         currentOperator = newOperator;
     }
 
-    public StringBuilder getLHSStringBuilder(){
-        StringBuilder lhsStringBuilder = new StringBuilder(getLeftOperand().toString());
-        return lhsStringBuilder;
-    }
 
     public void setCalculatorState(CalculatorState state) {
 
@@ -105,13 +90,16 @@ public class CalculatorModel extends AbstractModel {
                 setCalculatorState(CalculatorState.LHS);
                 break;
             case OP_SELECTED:
-                if(currentOperator.getSymbol().matches(OperatorEnum.SQUAREROOT.getSymbol())){
+                if (currentOperator.getSymbol().matches(OperatorEnum.SQUAREROOT.getSymbol())) {
                     setCalculatorState(CalculatorState.RESULT);
-                }
-                else{
+                } else {
                     setRightOperand(BigDecimal.ZERO);
                     setCalculatorState(CalculatorState.RHS);
                 }
+                break;
+            case ERROR:
+                String message = "ERROR";
+                setError(message);
                 break;
         }
 
@@ -129,12 +117,11 @@ public class CalculatorModel extends AbstractModel {
             case "×":
             case "÷":
             case "√":
-                if(getCalculatorState() == CalculatorState.RHS){
+                if(getCalculatorState() == CalculatorState.RHS || getCalculatorState() == CalculatorState.RESULT){
                     setCalculatorState(CalculatorState.RESULT);
                     handleEqualClick();
                     setLeftOperand(result);
                     setCalculatorState(CalculatorState.OP_SELECTED);
-                    Log.d("TESTING", "THIS IS THE LEFT OPERAND NOW " + getCalculatorState());
                 }
                 setCalculatorState(CalculatorState.OP_SELECTED);
                 handleOperatorButtonClick(buttonTag);
@@ -160,7 +147,7 @@ public class CalculatorModel extends AbstractModel {
         // Handle the click of a digit button
         if (getCalculatorState() == CalculatorState.LHS) {
             // Use StringBuilder to handle appending digits
-            StringBuilder lhsStringBuilder = getLHSStringBuilder();
+            StringBuilder lhsStringBuilder = new StringBuilder(getLeftOperand().toString());
 
             // Check if the digit is a decimal point and if one is already present
             if (digit.equals(".") && (!decimalEntered) ) {
@@ -224,6 +211,7 @@ public class CalculatorModel extends AbstractModel {
         } else if (operator.matches(OperatorEnum.DIVISION.getSymbol())) {
             OperatorEnum newOperator = OperatorEnum.DIVISION;
             setCurrentOperator(newOperator);
+
             Log.d("Test5", "This works. New Operator = " + newOperator.getSymbol());
         }
         else if (operator.matches(OperatorEnum.SQUAREROOT.getSymbol())) {
@@ -246,12 +234,6 @@ public class CalculatorModel extends AbstractModel {
                 setResult(BigDecimal.valueOf(doubleResult));
                 Log.d("Test6", "Here is the result: " + result);
             }
-            else {
-                if (rightOperand.equals(BigDecimal.ZERO)) {
-                    rightOperand = leftOperand;
-                }
-
-                setResult(BigDecimal.valueOf(0));
                 if (currentOperator == OperatorEnum.SUBTRACTION) {
                     setResult(leftOperand.subtract(rightOperand));
                 } else if (currentOperator == OperatorEnum.ADDITION) {
@@ -259,12 +241,16 @@ public class CalculatorModel extends AbstractModel {
                 } else if (currentOperator == OperatorEnum.MULTIPLICATION) {
                     setResult(leftOperand.multiply(rightOperand));
                 } else if (currentOperator == OperatorEnum.DIVISION) {
-                    setResult(leftOperand.divide(rightOperand));
+                    if(rightOperand.equals(BigDecimal.ZERO)){
+                        setCalculatorState(CalculatorState.ERROR);
+                    }
+                    else {
+                        setResult(leftOperand.divide(rightOperand, new MathContext(16, RoundingMode.HALF_UP)));
+                    }
                 }
                 Log.d("Test6", "Here is the result: " + result);
             }
         }
-    }
 
     private void setResult(BigDecimal newResult) {
 
@@ -275,6 +261,14 @@ public class CalculatorModel extends AbstractModel {
 
         firePropertyChange(CalculatorController.ELEMENT_NEWKEY_PROPERTY, oldValue, newValue);
 
+    }
+
+    private void setError(String errorMessage) {
+
+        String oldValue = result.toString();
+        String newValue = errorMessage;
+
+        firePropertyChange(CalculatorController.ELEMENT_NEWKEY_PROPERTY, oldValue, newValue);
     }
 
     public void handleClearClick() {
@@ -299,13 +293,24 @@ public class CalculatorModel extends AbstractModel {
         BigDecimal leftOperand = getLeftOperand();
         BigDecimal rightOperand = getRightOperand();
         if(getCalculatorState() == CalculatorState.RESULT) {
+
             BigDecimal value = rightOperand.divide(BigDecimal.valueOf(100));
             BigDecimal result = leftOperand.multiply(value);
+
             setRightOperand(result);
         }
     }
 
     private void handleSignClick(){
+        leftOperand = getLeftOperand();
+        rightOperand = getRightOperand();
+        if(getCalculatorState() == CalculatorState.LHS){
+            setLeftOperand(leftOperand.negate());
+            Log.d("TESTING", "this is the state : " + getCalculatorState());
+        }
 
+        if(getCalculatorState() == CalculatorState.RHS){
+            setRightOperand(rightOperand.negate());
+        }
     }
 }
